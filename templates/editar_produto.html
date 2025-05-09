@@ -1,0 +1,143 @@
+{% extends 'base_pdv.html' %}
+
+{% block title %}{{ produto and 'Editar Produto' or 'Cadastrar Produto' }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-6">
+  <h2 class="text-2xl font-bold mb-4">
+    {{ produto and 'Editar Produto' or 'Cadastrar Produto' }}
+  </h2>
+
+  <form method="post"
+        action="{{ url_for('editar_produto', id=(produto.id if produto else 0)) }}"
+        class="bg-base-100 p-6 rounded-lg shadow space-y-6">
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Coluna 1 -->
+      <div class="space-y-4">
+        <div class="form-control">
+          <label class="label">Código de Barras *</label>
+          <input type="text" name="codigo_barras" class="input input-bordered w-full" required
+                 value="{{ produto.codigo_barras if produto else '' }}">
+        </div>
+        <div class="form-control">
+          <label class="label">Nome *</label>
+          <input type="text" name="nome" class="input input-bordered w-full" required
+                 value="{{ produto.nome if produto else '' }}">
+        </div>
+        <div class="form-control">
+          <label class="label">Tipo *</label>
+          <select name="tipo" class="select select-bordered w-full" required>
+            <option value="unidade"
+              {% if produto and produto.tipo=='unidade' %}selected{% endif %}>
+              Unidade
+            </option>
+            <option value="peso"
+              {% if produto and produto.tipo=='peso' %}selected{% endif %}>
+              Peso (kg)
+            </option>
+          </select>
+        </div>
+        <div class="form-control">
+          <label class="label">Margem de Venda (%) *</label>
+          <input type="number" name="margem_venda" step="0.01" id="margemInput"
+                 class="input input-bordered w-full"
+                 value="{{ produto.margem_venda if produto else '0.00' }}" required>
+        </div>
+      </div>
+
+      <!-- Coluna 2 -->
+      <div class="space-y-4">
+        <div class="form-control">
+          <label class="label">Preço de Custo *</label>
+          <input type="number" name="preco_custo" step="0.01" id="precoCustoInput"
+                 class="input input-bordered w-full"
+                 value="{{ produto.preco_custo if produto else '0.00' }}" required>
+        </div>
+
+        <div class="form-control">
+          <label class="label">Preço de Venda</label>
+          <input type="number" name="preco_venda" step="0.01" id="precoVendaInput"
+                 class="input input-bordered w-full bg-gray-100" readonly
+                 value="{{ produto.preco_venda if produto else '0.00' }}">
+        </div>
+
+        <div class="form-control">
+          <label class="label">Estoque *</label>
+          <input type="number" name="estoque" step="0.001"
+                 class="input input-bordered w-full"
+                 value="{{ produto.estoque if produto else '0.000' }}" required>
+        </div>
+
+        <div class="form-control">
+          <label class="label">Categoria</label>
+          <select name="categoria" class="select select-bordered w-full">
+            <option value="hortifruti"
+              {% if produto and produto.categoria=='hortifruti' %}selected{% endif %}>
+              Hortifrúti
+            </option>
+            <option value="bebidas"
+              {% if produto and produto.categoria=='bebidas' %}selected{% endif %}>
+              Bebidas
+            </option>
+            <option value="mercearia"
+              {% if produto and produto.categoria=='mercearia' %}selected{% endif %}>
+              Mercearia
+            </option>
+            <option value="outros"
+              {% if produto and produto.categoria=='outros' %}selected{% endif %}>
+              Outros
+            </option>
+          </select>
+        </div>
+
+        <div class="form-control flex items-center space-x-2">
+          <input type="checkbox" name="perecivel" class="checkbox" id="perecivelCheckbox"
+                 {% if produto and produto.perecivel=='sim' %}checked{% endif %}>
+          <label for="perecivelCheckbox" class="label-text font-medium">Perecível?</label>
+        </div>
+
+        <div class="form-control {{ not (produto and produto.perecivel=='sim') and 'hidden' or '' }}"
+             id="validadeDiv">
+          <label class="label">Data de Validade</label>
+          <input type="date" name="validade" class="input input-bordered w-full"
+                 value="{{ produto.validade if produto and produto.validade else '' }}">
+        </div>
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-4">
+      <a href="{{ url_for('listar_produtos') }}" class="btn btn-outline">Cancelar</a>
+      <button type="submit" class="btn btn-primary">
+        {{ produto and 'Salvar Alterações' or 'Cadastrar Produto' }}
+      </button>
+    </div>
+  </form>
+</div>
+
+<script>
+  // Exibe/oculta campo de validade
+  const checkbox = document.getElementById('perecivelCheckbox');
+  const validadeDiv = document.getElementById('validadeDiv');
+  checkbox.addEventListener('change', () => {
+    validadeDiv.classList.toggle('hidden', !checkbox.checked);
+  });
+
+  // Cálculo automático do preço de venda
+  const margemInput = document.getElementById('margemInput');
+  const precoCustoInput = document.getElementById('precoCustoInput');
+  const precoVendaInput = document.getElementById('precoVendaInput');
+
+  function atualizarPrecoVenda() {
+    const custo = parseFloat(precoCustoInput.value) || 0;
+    const margem = parseFloat(margemInput.value) || 0;
+    precoVendaInput.value = (custo * (1 + margem / 100)).toFixed(2);
+  }
+
+  margemInput.addEventListener('input', atualizarPrecoVenda);
+  precoCustoInput.addEventListener('input', atualizarPrecoVenda);
+
+  // Inicializa o cálculo ao carregar
+  atualizarPrecoVenda();
+</script>
+{% endblock %}

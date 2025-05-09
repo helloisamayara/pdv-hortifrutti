@@ -1,0 +1,63 @@
+{% extends 'base_pdv.html' %}
+{% block title %}Início — PDV Hortifrutti{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+
+  <!-- Hero / Boas-vindas -->
+  <section class="bg-white rounded-lg shadow p-8 flex flex-col md:flex-row items-center justify-between">
+    <div>
+      <h1 class="text-4xl font-bold text-purple-600 mb-2">Bem-vindo ao PDV Hortifrutti</h1>
+      <p class="text-gray-600">Selecione uma opção abaixo para começar.</p>
+    </div>
+    <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="w-32 mt-6 md:mt-0"/>
+  </section>
+
+  <!-- Cards de Navegação -->
+  <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <a href="{{ url_for('vender') }}" 
+       class="card bg-purple-50 hover:bg-purple-100 transition p-6 rounded-lg shadow flex flex-col items-center text-center">
+      <i class="fas fa-cash-register text-4xl text-purple-600 mb-4"></i>
+      <h2 class="text-xl font-semibold mb-1">Vender</h2>
+      <p class="text-gray-500">Registrar nova venda</p>
+    </a>
+
+    <a href="{{ url_for('listar_produtos') }}"
+       class="card bg-green-50 hover:bg-green-100 transition p-6 rounded-lg shadow flex flex-col items-center text-center">
+      <i class="fas fa-apple-alt text-4xl text-green-600 mb-4"></i>
+      <h2 class="text-xl font-semibold mb-1">Produtos</h2>
+      <p class="text-gray-500">Gerenciar catálogo</p>
+    </a>
+
+    <a href="{{ url_for('caixa') }}"
+       class="card bg-blue-50 hover:bg-blue-100 transition p-6 rounded-lg shadow flex flex-col items-center text-center">
+      <i class="fas fa-chart-bar text-4xl text-blue-600 mb-4"></i>
+      <h2 class="text-xl font-semibold mb-1">Caixa</h2>
+      <p class="text-gray-500">Visão de vendas diárias</p>
+    </a>
+
+    <a href="{{ url_for('relatorio') }}"
+       class="card bg-yellow-50 hover:bg-yellow-100 transition p-6 rounded-lg shadow flex flex-col items-center text-center">
+      <i class="fas fa-chart-pie text-4xl text-yellow-600 mb-4"></i>
+      <h2 class="text-xl font-semibold mb-1">Relatórios</h2>
+      <p class="text-gray-500">Análise de desempenho</p>
+    </a>
+  </section>
+
+  <!-- Atalho para cadastro rápido -->
+  <section class="bg-white rounded-lg shadow p-6 flex flex-col sm:flex-row items-center justify-between">
+    <div class="flex items-center space-x-4 mb-4 sm:mb-0">
+      <i class="fas fa-plus text-3xl text-purple-600"></i>
+      <div>
+        <h3 class="text-lg font-semibold">Cadastrar Produto</h3>
+        <p class="text-gray-500">Adicione um novo item ao seu estoque</p>
+      </div>
+    </div>
+    <a href="{{ url_for('cadastrar_produto') }}"
+       class="btn bg-purple-600 hover:bg-purple-700 text-white">
+      <i class="fas fa-plus-circle mr-2"></i>Novo Produto
+    </a>
+  </section>
+
+</div>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends 'base_pdv.html' %}
+{% block title %}Caixa — PDV Hortifrutti{% endblock %}
+
+{% block content %}
+<div class="container mx-auto mt-6 p-6 bg-white rounded-lg shadow">
+
+  <!-- Cabeçalho com botão Início e filtro de data -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-4 sm:space-y-0">
+    <div class="flex items-center space-x-2">
+      <button onclick="location.href='{{ url_for('index') }}'" 
+              class="btn btn-sm bg-gray-500 text-white hover:bg-gray-600">
+        <i class="fas fa-home mr-1"></i>INÍCIO
+      </button>
+      <h2 class="text-2xl font-bold ml-4">Controle de Caixa</h2>
+    </div>
+    <form method="get" action="{{ url_for('caixa') }}" class="flex items-center space-x-2">
+      <label for="dataFiltro" class="font-medium">Data:</label>
+      <input type="date"
+             id="dataFiltro"
+             name="data"
+             value="{{ data_sel }}"
+             class="input input-bordered"/>
+      <button type="submit" class="btn btn-sm bg-blue-600 text-white hover:bg-blue-700">
+        Filtrar
+      </button>
+    </form>
+  </div>
+
+  {% if vendas %}
+    <div class="overflow-x-auto">
+      <table class="table w-full table-zebra">
+        <thead>
+          <tr>
+            <th>Hora</th>
+            <th>Pagamento</th>
+            <th class="text-right">Total (R$)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for v in vendas %}
+            <tr>
+              <td>{{ v.hora }}</td>
+              <td>{{ v.pagamento.capitalize() }}</td>
+              <td class="text-right">R$ {{ '%.2f'|format(v.total) }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-6 space-y-4 sm:space-y-0">
+      <div class="text-lg font-semibold">
+        Total em {{ data_sel }}: R$ {{ '%.2f'|format(total) }}
+      </div>
+      <a href="{{ url_for('caixa') }}?data={{ data_sel }}&export=csv"
+         class="btn btn-sm bg-green-500 text-white hover:bg-green-600">
+        <i class="fas fa-file-csv mr-2"></i>Exportar CSV
+      </a>
+    </div>
+  {% else %}
+    <div class="text-center py-10 text-gray-500">
+      <i class="fas fa-box-open fa-3x mb-4"></i>
+      <p class="text-lg">Nenhuma venda encontrada em {{ data_sel }}.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

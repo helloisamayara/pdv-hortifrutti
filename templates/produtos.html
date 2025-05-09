@@ -1,0 +1,61 @@
+{# templates/produtos.html #}
+{% extends 'base_pdv.html' %}
+{% block title %}Lista de Produtos{% endblock %}
+
+{% block content %}
+<div class="container mx-auto mt-10">
+  <div class="card bg-white rounded-lg shadow-lg p-6">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-3xl font-bold">Lista de Produtos</h2>
+      <div class="flex space-x-2">
+        <a href="{{ url_for('index') }}" class="btn btn-outline btn-sm flex items-center">
+          <i class="fas fa-home mr-2"></i>Início
+        </a>
+        <a href="{{ url_for('cadastrar_produto') }}" class="btn btn-sm btn-primary flex items-center">
+          <i class="fas fa-plus-circle mr-2"></i>Cadastrar Produto
+        </a>
+      </div>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="table table-zebra w-full">
+        <thead class="bg-gray-700 text-white">
+          <tr>
+            <th class="px-4 py-2">Código</th>
+            <th class="px-4 py-2">Nome</th>
+            <th class="px-4 py-2">Tipo</th>
+            <th class="px-4 py-2">Preço Venda</th>
+            <th class="px-4 py-2">Estoque</th>
+            <th class="px-4 py-2">Categoria</th>
+            <th class="px-4 py-2">Perecível</th>
+            <th class="px-4 py-2">Validade</th>
+            <th class="px-4 py-2">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in produtos %}
+          <tr>
+            <td class="border px-4 py-2">{{ p.codigo_barras }}</td>
+            <td class="border px-4 py-2">{{ p.nome }}</td>
+            <td class="border px-4 py-2">{{ p.tipo }}</td>
+            <td class="border px-4 py-2">R$ {{ '%.2f'|format(p.preco_venda) }}</td>
+            <td class="border px-4 py-2">{{ p.estoque }}</td>
+            <td class="border px-4 py-2">{{ p.categoria }}</td>
+            <td class="border px-4 py-2">{{ p.perecivel }}</td>
+            <td class="border px-4 py-2">{{ p.validade }}</td>
+            <td class="border px-4 py-2 space-x-2">
+              <a href="{{ url_for('editar_produto', id=p.id) }}" class="btn btn-xs btn-info">
+                <i class="fas fa-edit"></i>
+              </a>
+              <button onclick="fetch('{{ url_for('excluir_produto', id=p.id) }}',{method:'DELETE'}) .then(()=>location.reload())"
+                      class="btn btn-xs btn-error">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

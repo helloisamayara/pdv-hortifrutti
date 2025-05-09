@@ -1,0 +1,94 @@
+{% extends 'base_pdv.html' %}
+{% block title %}Relatório de Vendas — PDV Hortifrutti{% endblock %}
+
+{% block content %}
+<div class="container mx-auto mt-6 space-y-6">
+
+  <!-- Cabeçalho com Início e filtro de data -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 space-y-4 sm:space-y-0">
+    <div class="flex items-center space-x-2">
+      <button onclick="location.href='{{ url_for('index') }}'"
+              class="btn btn-sm bg-gray-500 text-white hover:bg-gray-600">
+        <i class="fas fa-home mr-1"></i>INÍCIO
+      </button>
+      
+      <h2 class="text-2xl font-bold ml-4">Relatório de Vendas</h2>
+    </div>
+    <form method="get" action="{{ url_for('relatorio') }}" class="flex items-center space-x-2">
+      <label for="dataFiltro" class="font-medium">Data:</label>
+      <input type="date"
+             id="dataFiltro"
+             name="data"
+             value="{{ request.args.get('data', '') or now().strftime('%Y-%m-%d') }}"
+             class="input input-bordered"/>
+      <button type="submit" class="btn btn-sm bg-blue-600 text-white hover:bg-blue-700">
+        Filtrar
+      </button>
+    </form>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+    <!-- Histórico de Vendas -->
+    <div class="bg-white rounded-lg shadow p-6 overflow-auto">
+      <h3 class="text-xl font-semibold mb-4">Histórico de Vendas</h3>
+      <table class="table w-full table-zebra">
+        <thead>
+          <tr>
+            <th>Hora</th>
+            <th>Pagamento</th>
+            <th class="text-right">Total (R$)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if vendas %}
+            {% for v in vendas %}
+            <tr>
+              <td>{{ v.hora }}</td>
+              <td>{{ v.pagamento.capitalize() }}</td>
+              <td class="text-right">R$ {{ '%.2f'|format(v.total) }}</td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="3" class="text-center text-gray-500">
+                Nenhuma venda registrada para esta data.
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Resumo por Produto -->
+    <div class="bg-white rounded-lg shadow p-6 overflow-auto">
+      <h3 class="text-xl font-semibold mb-4">Produtos Vendidos (Total)</h3>
+      <table class="table w-full table-zebra">
+        <thead>
+          <tr>
+            <th>Produto</th>
+            <th class="text-right">Quantidade</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if produtos_vendidos %}
+            {% for p in produtos_vendidos %}
+            <tr>
+              <td>{{ p.nome }}</td>
+              <td class="text-right">{{ '%.3f'|format(p.quantidade) }}</td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="2" class="text-center text-gray-500">
+                Nenhum produto vendido nesta data.
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

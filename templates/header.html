@@ -1,0 +1,13 @@
+<header class="fixed top-0 left-0 w-full bg-purple-700 text-white shadow-md z-50">
+    <div class="container mx-auto flex items-center justify-between py-4 px-6">
+      <h1 class="text-2xl font-bold">EMPÓRIO GONÇALVES</h1>
+      <div class="flex gap-6 text-sm">
+        <span><i class="fas fa-user mr-1"></i>Operador</span>
+        <span><i class="fas fa-cash-register mr-1"></i>CX: 01</span>
+        <span><i class="fas fa-receipt mr-1"></i>Pedido: {{ session.get('pedido_id', 1) }}</span>
+        <span><i class="fas fa-users mr-1"></i>Consumidor Final</span>
+      </div>
+    </div>
+    <div class="h-20"></div>  {# empurra o conteúdo abaixo #}
+  </header>
+  
