@@ -1,4 +1,4 @@
-<section class="flex flex-col h-full">
+<section class="flex flex-col h-full"> 
   <!-- Cabeçalho fixo -->
   <div class="sticky top-0 bg-white bg-opacity-90 backdrop-blur-sm py-4 px-2 border-b z-10 flex items-center justify-between">
     <h3 class="text-xl font-semibold flex items-center space-x-2">
@@ -14,7 +14,7 @@
   <div id="cartItems" class="flex-1 overflow-auto space-y-4 py-4">
     {% if carrinho %}
       {% for item in carrinho %}
-      <article class="bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-all">
+      <article class="bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-all" data-index="{{ loop.index0 }}">
         <div class="flex justify-between items-start">
           <div>
             <h4 class="font-medium text-gray-800">{{ item.nome }}</h4>
@@ -33,11 +33,13 @@
         </div>
         <div class="mt-2 flex justify-end space-x-2">
           <button onclick="editarItem({{ loop.index0 }})"
-                  class="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-50 transition-all">
+                  class="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-50 transition-all"
+                  aria-label="Editar item">
             <i class="fas fa-pen"></i>
           </button>
           <button onclick="removerItem({{ loop.index0 }})"
-                  class="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-50 transition-all">
+                  class="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-50 transition-all"
+                  aria-label="Remover item">
             <i class="fas fa-trash"></i>
           </button>
         </div>
@@ -61,12 +63,14 @@
       </span>
     </div>
     <div class="flex gap-3">
-      <button onclick="abrirModalPagamento()"
+      <button id="btnCartFinalizar"
+              onclick="abrirModalPagamento()"
               class="flex-1 btn bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg"
               {% if not carrinho %}disabled{% endif %}>
         Finalizar Venda
       </button>
-      <button onclick="cancelarVenda()"
+      <button id="btnCartCancelar"
+              onclick="cancelarVenda()"
               class="flex-1 btn bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg"
               {% if not carrinho %}disabled{% endif %}>
         Cancelar Pedido

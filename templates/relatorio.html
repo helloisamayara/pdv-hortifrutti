@@ -4,23 +4,17 @@
 {% block content %}
 <div class="container mx-auto mt-6 space-y-6">
 
-  <!-- Cabeçalho com Início e filtro de data -->
+  <!-- Cabeçalho -->
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 space-y-4 sm:space-y-0">
     <div class="flex items-center space-x-2">
-      <button onclick="location.href='{{ url_for('index') }}'"
-              class="btn btn-sm bg-gray-500 text-white hover:bg-gray-600">
+      <a href="{{ url_for('index') }}" class="btn btn-sm bg-gray-500 text-white hover:bg-gray-600">
         <i class="fas fa-home mr-1"></i>INÍCIO
-      </button>
-      
+      </a>
       <h2 class="text-2xl font-bold ml-4">Relatório de Vendas</h2>
     </div>
     <form method="get" action="{{ url_for('relatorio') }}" class="flex items-center space-x-2">
       <label for="dataFiltro" class="font-medium">Data:</label>
-      <input type="date"
-             id="dataFiltro"
-             name="data"
-             value="{{ request.args.get('data', '') or now().strftime('%Y-%m-%d') }}"
-             class="input input-bordered"/>
+      <input type="date" id="dataFiltro" name="data" value="{{ selected_date }}" class="input input-bordered"/>
       <button type="submit" class="btn btn-sm bg-blue-600 text-white hover:bg-blue-700">
         Filtrar
       </button>
@@ -28,7 +22,6 @@
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
     <!-- Histórico de Vendas -->
     <div class="bg-white rounded-lg shadow p-6 overflow-auto">
       <h3 class="text-xl font-semibold mb-4">Histórico de Vendas</h3>
@@ -88,7 +81,6 @@
         </tbody>
       </table>
     </div>
-
   </div>
 </div>
 {% endblock %}

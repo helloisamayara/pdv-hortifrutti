@@ -1,33 +1,22 @@
-<!-- templates/footer.html -->
 <footer class="bg-gray-100 border-t border-gray-200 py-2 fixed bottom-0 left-0 w-full z-50">
-    <div class="container mx-auto flex justify-center gap-4">
-      <!-- Menu (F1) -->
-      <button type="button" onclick="openMenu()"
-              class="btn btn-sm bg-gray-500 text-white">
-        <i class="fas fa-bars mr-1"></i> MENU (F1)
-      </button>
-      <!-- Localizar (F5) -->
-      <button type="button" onclick="localizarProduto()"
-              class="btn btn-sm bg-blue-600 text-white">
-        <i class="fas fa-search mr-1"></i> LOCALIZAR (F5)
-      </button>
-      <!-- Cancelar Produto (F6) -->
-      <button type="button" onclick="cancelarProduto()"
-              class="btn btn-sm bg-yellow-500 text-white">
-        <i class="fas fa-ban mr-1"></i> CANCELAR PRODUTO (F6)
-      </button>
-      <!-- Finalizar Venda (F2) -->
-      <button type="button" onclick="abrirModalPagamento()"
-              class="btn btn-sm bg-green-500 text-white">
-        <i class="fas fa-check-circle mr-1"></i> FINALIZAR VENDA (F2)
-      </button>
-      <!-- Cancelar Pedido (F9) -->
-      <button type="button" onclick="cancelarVenda()"
-              class="btn btn-sm bg-red-500 text-white">
-        <i class="fas fa-times-circle mr-1"></i> CANCELAR PEDIDO (F9)
-      </button>
-    </div>
-    <div class="container mx-auto text-center text-xs text-gray-500 mt-1">
-      &copy; {{ now().year }} Empório Gonçalves – Todos os direitos reservados.
-    </div>
-  </footer>
+  <div class="container mx-auto flex justify-center gap-4">
+    <button type="button" onclick="openMenu()" class="btn btn-sm bg-gray-500 text-white">
+      <i class="fas fa-bars mr-1"></i> MENU (F1)
+    </button>
+    <button type="button" onclick="localizarProduto()" class="btn btn-sm bg-blue-600 text-white">
+      <i class="fas fa-search mr-1"></i> LOCALIZAR (F5)
+    </button>
+    <button type="button" onclick="cancelarProduto()" class="btn btn-sm bg-yellow-500 text-white">
+      <i class="fas fa-ban mr-1"></i> CANCELAR PRODUTO (F6)
+    </button>
+    <button type="button" onclick="abrirModalPagamento()" class="btn btn-sm bg-green-500 text-white">
+      <i class="fas fa-check-circle mr-1"></i> FINALIZAR VENDA (F2)
+    </button>
+    <button type="button" onclick="cancelarVenda()" class="btn btn-sm bg-red-500 text-white">
+      <i class="fas fa-times-circle mr-1"></i> CANCELAR PEDIDO (F9)
+    </button>
+  </div>
+  <div class="container mx-auto text-center text-xs text-gray-500 mt-1">
+    &copy; {{ now().year }} Empório Gonçalves – Todos os direitos reservados.
+  </div>
+</footer>

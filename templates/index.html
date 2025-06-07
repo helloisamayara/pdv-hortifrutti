@@ -2,62 +2,78 @@
 {% block title %}Início — PDV Hortifrutti{% endblock %}
 
 {% block content %}
-<div class="space-y-8">
+<div class="container mx-auto mt-6 space-y-8">
 
-  <!-- Hero / Boas-vindas -->
-  <section class="bg-white rounded-lg shadow p-8 flex flex-col md:flex-row items-center justify-between">
-    <div>
-      <h1 class="text-4xl font-bold text-purple-600 mb-2">Bem-vindo ao PDV Hortifrutti</h1>
-      <p class="text-gray-600">Selecione uma opção abaixo para começar.</p>
+  <!-- Métricas do dia -->
+  <div class="flex flex-col md:flex-row gap-4">
+    <div class="flex-1 bg-white rounded-lg p-6 shadow">
+      <span class="text-sm text-gray-500">Vendas Hoje</span>
+      <p class="text-3xl font-bold text-green-600">R$ {{ total_vendas_hoje }}</p>
     </div>
-    <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="w-32 mt-6 md:mt-0"/>
-  </section>
+    <div class="flex-1 bg-white rounded-lg p-6 shadow">
+      <span class="text-sm text-gray-500">Itens Vendidos Hoje</span>
+      <p class="text-3xl font-bold text-purple-600">{{ total_itens_hoje }}</p>
+    </div>
+  </div>
 
-  <!-- Cards de Navegação -->
-  <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-    <a href="{{ url_for('vender') }}" 
-       class="card bg-purple-50 hover:bg-purple-100 transition p-6 rounded-lg shadow flex flex-col items-center text-center">
-      <i class="fas fa-cash-register text-4xl text-purple-600 mb-4"></i>
-      <h2 class="text-xl font-semibold mb-1">Vender</h2>
-      <p class="text-gray-500">Registrar nova venda</p>
+  <!-- Busca Rápida -->
+  <div class="flex justify-center">
+    <input id="homeSearch" type="text"
+           placeholder="Buscar produto por nome ou código…"
+           class="input input-bordered w-full max-w-lg focus:ring-2 focus:ring-purple-500"/>
+  </div>
+
+  <!-- Cards de Ação -->
+  <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
+    <a href="{{ url_for('vender') }}"
+       class="p-6 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl shadow-lg transition-all flex flex-col items-center">
+      <i class="fas fa-cash-register fa-3x mb-4"></i>
+      <h2 class="text-xl font-semibold">Nova Venda</h2>
+      <p class="mt-2 text-white/80 text-sm">Realizar uma venda</p>
+    </a>
+
+    <a href="{{ url_for('cadastrar_produto') }}"
+       class="p-6 bg-green-600 hover:bg-green-700 text-white rounded-2xl shadow-lg transition-all flex flex-col items-center">
+      <i class="fas fa-apple-alt fa-3x mb-4"></i>
+      <h2 class="text-xl font-semibold">Cadastrar Produto</h2>
+      <p class="mt-2 text-white/80 text-sm">Registrar novo item no estoque</p>
     </a>
 
     <a href="{{ url_for('listar_produtos') }}"
-       class="card bg-green-50 hover:bg-green-100 transition p-6 rounded-lg shadow flex flex-col items-center text-center">
-      <i class="fas fa-apple-alt text-4xl text-green-600 mb-4"></i>
-      <h2 class="text-xl font-semibold mb-1">Produtos</h2>
-      <p class="text-gray-500">Gerenciar catálogo</p>
-    </a>
-
-    <a href="{{ url_for('caixa') }}"
-       class="card bg-blue-50 hover:bg-blue-100 transition p-6 rounded-lg shadow flex flex-col items-center text-center">
-      <i class="fas fa-chart-bar text-4xl text-blue-600 mb-4"></i>
-      <h2 class="text-xl font-semibold mb-1">Caixa</h2>
-      <p class="text-gray-500">Visão de vendas diárias</p>
+       class="p-6 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl shadow-lg transition-all flex flex-col items-center">
+      <i class="fas fa-list fa-3x mb-4"></i>
+      <h2 class="text-xl font-semibold">Ver Produtos</h2>
+      <p class="mt-2 text-white/80 text-sm">Estoque cadastrado</p>
     </a>
 
     <a href="{{ url_for('relatorio') }}"
-       class="card bg-yellow-50 hover:bg-yellow-100 transition p-6 rounded-lg shadow flex flex-col items-center text-center">
-      <i class="fas fa-chart-pie text-4xl text-yellow-600 mb-4"></i>
-      <h2 class="text-xl font-semibold mb-1">Relatórios</h2>
-      <p class="text-gray-500">Análise de desempenho</p>
+       class="p-6 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl shadow-lg transition-all flex flex-col items-center">
+      <i class="fas fa-chart-line fa-3x mb-4"></i>
+      <h2 class="text-xl font-semibold">Relatórios</h2>
+      <p class="mt-2 text-white/80 text-sm">Histórico de vendas</p>
     </a>
-  </section>
 
-  <!-- Atalho para cadastro rápido -->
-  <section class="bg-white rounded-lg shadow p-6 flex flex-col sm:flex-row items-center justify-between">
-    <div class="flex items-center space-x-4 mb-4 sm:mb-0">
-      <i class="fas fa-plus text-3xl text-purple-600"></i>
-      <div>
-        <h3 class="text-lg font-semibold">Cadastrar Produto</h3>
-        <p class="text-gray-500">Adicione um novo item ao seu estoque</p>
-      </div>
-    </div>
-    <a href="{{ url_for('cadastrar_produto') }}"
-       class="btn bg-purple-600 hover:bg-purple-700 text-white">
-      <i class="fas fa-plus-circle mr-2"></i>Novo Produto
+    <a href="{{ url_for('caixa') }}"
+       class="p-6 bg-yellow-600 hover:bg-yellow-700 text-white rounded-2xl shadow-lg transition-all flex flex-col items-center">
+      <i class="fas fa-chart-bar fa-3x mb-4"></i>
+      <h2 class="text-xl font-semibold">Caixa</h2>
+      <p class="mt-2 text-white/80 text-sm">Fluxo de caixa</p>
     </a>
-  </section>
+  </div>
 
 </div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script>
+    document.getElementById('homeSearch').addEventListener('keypress', e => {
+      if (e.key === 'Enter') {
+        const q = encodeURIComponent(e.target.value.trim());
+        if (q) {
+          window.location = `/produtos?search=${q}`;
+        }
+      }
+    });
+  </script>
 {% endblock %}

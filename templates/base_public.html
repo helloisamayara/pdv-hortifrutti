@@ -1,96 +1,26 @@
-<!-- templates/base_pdv.html -->
 <!DOCTYPE html>
-<html lang="pt-BR" data-theme="light">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>{% block title %}PDV Hortifrutti{% endblock %}</title>
 
-  <!-- Fonte Inter -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
-
-  <!-- Tailwind + DaisyUI + Font Awesome -->
+  <!-- Tailwind, DaisyUI e Font Awesome -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/npm/daisyui@3.8.0/dist/full.css" rel="stylesheet"/>
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 
   <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      background: #f3f4f6;
-      color: #374151;
-      font-family: 'Inter', sans-serif;
-      line-height: 1.6;
-    }
-    .input, select, textarea {
-      background: #ffffff !important;
-    }
-    .modal-box {
-      background: #ffffff;
-      color: #374151;
-    }
-    .transition-all { transition: all 0.2s ease-in-out; }
-
-    /* Acessibilidade: skip link e estilos de foco */
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0,0,0,0);
-      white-space: nowrap;
-      border: 0;
-    }
-    .focus-not-sr-only:focus {
-      position: static;
-      width: auto;
-      height: auto;
-      overflow: visible;
-      clip: auto;
-      margin: 0;
-      white-space: normal;
-    }
+    /* Estilo base para páginas públicas (sem header/footer fixos) */
+    html, body { height:100%; margin:0; background:#f3f4f6; color:#1f2937; }
   </style>
   {% block head_extra %}{% endblock %}
 </head>
 <body class="flex flex-col min-h-screen">
-
-  <!-- Skip-link para pular direto ao conteúdo -->
-  <a href="#main-content"
-     class="sr-only focus-not-sr-only p-4 bg-white text-purple-700 font-medium">
-    Pular para o conteúdo
-  </a>
-
-  <!-- HEADER fixo -->
-  <header role="banner"
-          class="bg-purple-700 text-white shadow-sm fixed top-0 left-0 w-full z-50">
-    <!-- …seu código de header… -->
-  </header>
-  <div class="h-16"></div>
-
-  <!-- SIDEBAR -->
-  <nav id="sidebar" role="navigation" aria-label="Menu rápido lateral" class="hidden fixed left-0 top-0 h-full w-64 bg-white shadow-lg z-40 p-6 overflow-auto">
-    <!-- …seu menu… -->
-  </nav>
-
-  <!-- CONTEÚDO PRINCIPAL -->
-  <main id="main-content" role="main" class="flex-1 overflow-auto px-4 py-6">
+  <main class="flex-1 overflow-auto">
     {% block content %}{% endblock %}
   </main>
-
-  <!-- FOOTER -->
-  <footer role="contentinfo" class="bg-gray-100 text-gray-700 mt-auto border-t">
-    <div class="container mx-auto px-4 py-4 text-center text-sm">
-      &copy; {{ current_year }} PDV Hortifrutti. Todos os direitos reservados.
-    </div>
-  </footer>
-
-  {% block scripts %}
-    <!-- seus scripts (theme-toggle, pdv.js, sw.js…) -->
-  {% endblock %}
+  {% block scripts %}{% endblock %}
 </body>
 </html>

@@ -2,66 +2,97 @@
 {% block title %}Caixa — PDV Hortifrutti{% endblock %}
 
 {% block content %}
-<div class="container mx-auto mt-6 p-6 bg-white rounded-lg shadow">
+<div class="container mx-auto mt-6 space-y-8">
 
-  <!-- Cabeçalho com botão Início e filtro de data -->
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-4 sm:space-y-0">
-    <div class="flex items-center space-x-2">
-      <button onclick="location.href='{{ url_for('index') }}'" 
-              class="btn btn-sm bg-gray-500 text-white hover:bg-gray-600">
-        <i class="fas fa-home mr-1"></i>INÍCIO
-      </button>
-      <h2 class="text-2xl font-bold ml-4">Controle de Caixa</h2>
+  <!-- Cabeçalho -->
+  <div class="flex justify-between items-center">
+    <h2 class="text-2xl font-bold">Fluxo de Caixa do Dia</h2>
+    <a href="{{ url_for('index') }}" class="btn btn-sm bg-gray-500 text-white hover:bg-gray-600">
+      <i class="fas fa-home mr-1"></i>INÍCIO
+    </a>
+  </div>
+
+  <!-- Resumo -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+    <div class="bg-white rounded-lg p-4 shadow">
+      <span class="text-gray-500">Saldo Inicial</span>
+      <p class="text-2xl font-bold text-blue-700">R$ {{ '%.2f'|format(saldo_inicial) }}</p>
     </div>
-    <form method="get" action="{{ url_for('caixa') }}" class="flex items-center space-x-2">
-      <label for="dataFiltro" class="font-medium">Data:</label>
-      <input type="date"
-             id="dataFiltro"
-             name="data"
-             value="{{ data_sel }}"
-             class="input input-bordered"/>
-      <button type="submit" class="btn btn-sm bg-blue-600 text-white hover:bg-blue-700">
-        Filtrar
-      </button>
+    <div class="bg-white rounded-lg p-4 shadow">
+      <span class="text-gray-500">Vendas</span>
+      <p class="text-2xl font-bold text-green-600">R$ {{ '%.2f'|format(total_vendas) }}</p>
+    </div>
+    <div class="bg-white rounded-lg p-4 shadow">
+      <span class="text-gray-500">Entradas Extras</span>
+      <p class="text-2xl font-bold text-indigo-600">R$ {{ '%.2f'|format(entradas) }}</p>
+    </div>
+    <div class="bg-white rounded-lg p-4 shadow">
+      <span class="text-gray-500">Saídas (Sangrias)</span>
+      <p class="text-2xl font-bold text-red-600">– R$ {{ '%.2f'|format(saidas) }}</p>
+    </div>
+    <div class="bg-white rounded-lg p-4 shadow col-span-1 md:col-span-2">
+      <span class="text-gray-500">Saldo Total do Dia</span>
+      <p class="text-3xl font-extrabold text-purple-700">R$ {{ '%.2f'|format(saldo_total) }}</p>
+    </div>
+  </div>
+
+  <!-- Lançar movimento -->
+  <div class="bg-white rounded-lg shadow p-6">
+    <h3 class="text-xl font-semibold mb-4">Registrar Movimento</h3>
+    <form method="post" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+      <div>
+        <label class="label">Tipo</label>
+        <select name="tipo" class="select select-bordered w-full" required>
+          <option value="saldo_inicial">Saldo Inicial</option>
+          <option value="entrada">Entrada</option>
+          <option value="saida">Saída</option>
+        </select>
+      </div>
+      <div>
+        <label class="label">Valor (R$)</label>
+        <input type="number" name="valor" step="0.01" min="0.01" class="input input-bordered w-full" required>
+      </div>
+      <div class="md:col-span-2">
+        <label class="label">Descrição</label>
+        <input type="text" name="descricao" placeholder="Ex: Troco inicial, retirada, etc"
+               class="input input-bordered w-full">
+      </div>
+      <div class="md:col-span-4 text-right">
+        <button class="btn btn-primary">Registrar</button>
+      </div>
     </form>
   </div>
 
-  {% if vendas %}
-    <div class="overflow-x-auto">
-      <table class="table w-full table-zebra">
-        <thead>
+  <!-- Movimentos do dia -->
+  <div class="bg-white rounded-lg shadow p-6">
+    <h3 class="text-xl font-semibold mb-4">Movimentos do Dia</h3>
+    <table class="table w-full table-zebra">
+      <thead>
+        <tr>
+          <th>Hora</th>
+          <th>Tipo</th>
+          <th>Descrição</th>
+          <th class="text-right">Valor (R$)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if movimentos %}
+          {% for mov in movimentos %}
           <tr>
-            <th>Hora</th>
-            <th>Pagamento</th>
-            <th class="text-right">Total (R$)</th>
+            <td>{{ mov.hora }}</td>
+            <td class="capitalize">{{ mov.tipo.replace('_', ' ') }}</td>
+            <td>{{ mov.descricao }}</td>
+            <td class="text-right {% if mov.tipo == 'saida' %}text-red-600{% elif mov.tipo == 'entrada' %}text-green-600{% else %}text-blue-600{% endif %}">
+              {{ '%.2f'|format(mov.valor) }}
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          {% for v in vendas %}
-            <tr>
-              <td>{{ v.hora }}</td>
-              <td>{{ v.pagamento.capitalize() }}</td>
-              <td class="text-right">R$ {{ '%.2f'|format(v.total) }}</td>
-            </tr>
           {% endfor %}
-        </tbody>
-      </table>
-    </div>
+        {% else %}
+          <tr><td colspan="4" class="text-center text-gray-500">Nenhum movimento registrado.</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
 
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-6 space-y-4 sm:space-y-0">
-      <div class="text-lg font-semibold">
-        Total em {{ data_sel }}: R$ {{ '%.2f'|format(total) }}
-      </div>
-      <a href="{{ url_for('caixa') }}?data={{ data_sel }}&export=csv"
-         class="btn btn-sm bg-green-500 text-white hover:bg-green-600">
-        <i class="fas fa-file-csv mr-2"></i>Exportar CSV
-      </a>
-    </div>
-  {% else %}
-    <div class="text-center py-10 text-gray-500">
-      <i class="fas fa-box-open fa-3x mb-4"></i>
-      <p class="text-lg">Nenhuma venda encontrada em {{ data_sel }}.</p>
-    </div>
-  {% endif %}
 </div>
 {% endblock %}

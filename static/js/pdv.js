@@ -1,86 +1,181 @@
 // static/js/pdv.js
-// --------------------------------------------------
-// PDV Hortifrutti - Script completo (~230 linhas)
-// Adiciona busca “Localizar Produtos” em modal + todo o resto
-// --------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
-  // ——— estado da busca ———
   let allProducts = []
+  const form = document.getElementById('addForm')
+  const codigoInp = document.getElementById('codigoInput')
+  const quantInp = document.getElementById('quantidadeInput')
+  const errCod = document.getElementById('error-codigo')
+  const errQt = document.getElementById('error-quantidade')
+  const cartArea = document.getElementById('cartItems')
+  const totalSpan = document.getElementById('totalVenda')
+  const btnFinal = document.getElementById('btnFinalizar')
+  const btnMenu = document.getElementById('btn-menu')
 
-  // ——— adicionar produtos ———
-  const form        = document.getElementById('addForm')
-  const codigoInp   = document.getElementById('codigoInput')
-  const quantInp    = document.getElementById('quantidadeInput')
-  const errCod      = document.getElementById('error-codigo')
-  const errQt       = document.getElementById('error-quantidade')
+  const payToggle = document.getElementById('modal-finalizar-toggle')
+  const descInput = document.getElementById('modal-desconto')
+  const recInput = document.getElementById('modal-recebido')
+  const trocoCont = document.getElementById('trocoContainer')
+  const trocoInput = document.getElementById('modal-troco')
+  const payRads = document.querySelectorAll('input[name="pagamento"]')
+  const btnConfirm = document.getElementById('btn-confirmar-venda')
 
-  // ——— carrinho & finalização ———
-  const cartArea    = document.getElementById('cartItems')
-  const btnFinal    = document.getElementById('btnFinalizar')
-  const totalSpan   = document.getElementById('totalVenda')
+  const searchToggle = document.getElementById('modal-search-toggle')
+  const searchInput = document.getElementById('searchInput')
+  const resultsBox = document.getElementById('searchResults')
 
-  // ——— modal pagamento ———
-  const payToggle   = document.getElementById('modal-finalizar-toggle')
-  const descInput   = document.getElementById('modal-desconto')
-  const recInput    = document.getElementById('modal-recebido')
-  const trocoCont   = document.getElementById('trocoContainer')
-  const trocoInput  = document.getElementById('modal-troco')
-  const payRads     = document.querySelectorAll('input[name="pagamento"]')
-  const btnConfirm  = document.getElementById('btn-confirmar-venda')
+  const toastBox = document.createElement('div')
+  toastBox.style = `
+    position: fixed;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #323232;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    z-index: 9999;
+    font-weight: 500;
+    display: none;
+  `
+  document.body.appendChild(toastBox)
 
-  // ——— modal busca ———
-  const searchToggle  = document.getElementById('modal-search-toggle')
-  const searchInput   = document.getElementById('searchInput')
-  const resultsBox    = document.getElementById('searchResults')
+  function showToast(msg) {
+    toastBox.textContent = msg
+    toastBox.style.display = 'block'
+    setTimeout(() => { toastBox.style.display = 'none' }, 2500)
+  }
 
-  // converter R$ … ou texto → float
+  window.dispatchEvent = (event => {
+    if (event.detail) showToast(event.detail)
+    return true
+  })
+
   function parseNum(str) {
     return parseFloat(str.replace(/[^\d\.]/g, '')) || 0
   }
 
-  // ————————————————————————————————————————————————
-  // ABRIR “LOCALIZAR PRODUTOS” — carrega only once
-  // ————————————————————————————————————————————————
+  function renderCarrinho(itens, total) {
+    cartArea.innerHTML = itens.length
+      ? itens.map((item, idx) => `
+        <article class="bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-all">
+          <div class="flex justify-between items-start">
+            <div>
+              <h4 class="font-medium text-gray-800">${item.nome}</h4>
+              <p class="text-sm text-gray-500">
+                ${item.quantidade}${item.tipo==='peso'?'kg':'un'} × R$ ${item.preco.toFixed(2)}
+              </p>
+            </div>
+            <div class="text-right">
+              <span class="font-semibold text-gray-800">R$ ${item.subtotal.toFixed(2)}</span>
+            </div>
+          </div>
+          <div class="mt-2 flex justify-end space-x-2">
+            <button onclick="removerItem(${idx})"
+                    class="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-50 transition-all">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </article>
+      `).join('')
+      : `<div class="flex-1 flex flex-col items-center justify-center text-gray-400">
+           <i class="fas fa-shopping-basket fa-2x mb-3 opacity-50"></i>
+           <p>Seu carrinho está vazio</p>
+           <p class="text-sm">Adicione produtos para começar</p>
+         </div>`
+
+    totalSpan.textContent = `R$ ${total.toFixed(2)}`
+    updateFinal()
+  }
+
+  function updateFinal() {
+    btnFinal.disabled = !(cartArea.querySelectorAll('article').length > 0)
+  }
+
+  form.addEventListener('submit', e => {
+    e.preventDefault()
+    errCod.classList.add('hidden')
+    errQt.classList.add('hidden')
+
+    fetch('/api/adicionar_produto', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        codigo_barras: codigoInp.value.trim(),
+        quantidade: quantInp.value.trim()
+      })
+    })
+    .then(r => r.json().then(data => ({ ok: r.ok, data })))
+    .then(({ ok, data }) => {
+      if (!ok) {
+        showToast(data.error || 'Erro ao adicionar.')
+        return
+      }
+      renderCarrinho(data.carrinho, data.total)
+      form.reset()
+      quantInp.value = '1.000'
+      codigoInp.focus()
+      showToast('Produto adicionado!')
+    })
+    .catch(() => showToast('Falha de conexão.'))
+  })
+
+  window.removerItem = idx => {
+    if (!confirm('Remover este item?')) return
+    fetch('/api/remove_item', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ index: idx })
+    })
+    .then(r => r.json())
+    .then(data => {
+      renderCarrinho(data.carrinho, data.total)
+      showToast('Item removido.')
+    })
+    .catch(() => showToast('Erro ao remover.'))
+  }
+
   window.abrirLocalizar = () => {
     searchToggle.checked = true
     searchInput.value = ''
-    resultsBox.innerHTML = '<p class="text-center text-gray-500">Digite acima para buscar.</p>'
+    resultsBox.innerHTML = Array(5).fill().map(() =>
+      `<div class="h-6 bg-gray-200 rounded animate-pulse my-2"></div>`
+    ).join('')
 
     if (!allProducts.length) {
       fetch('/api/produtos')
         .then(r => r.json())
         .then(json => {
           allProducts = json
+          resultsBox.innerHTML = `<p class="text-center text-gray-500">Digite acima para buscar.</p>`
         })
-        .catch(_=>{
-          resultsBox.innerHTML = '<p class="text-center text-red-500">Falha ao carregar produtos.</p>'
+        .catch(() => {
+          resultsBox.innerHTML = `<p class="text-center text-red-500">Falha ao carregar produtos.</p>`
         })
+    } else {
+      setTimeout(() => {
+        resultsBox.innerHTML = `<p class="text-center text-gray-500">Digite acima para buscar.</p>`
+      }, 300)
     }
-    // foco
-    setTimeout(()=> searchInput.focus(), 200)
+
+    setTimeout(() => searchInput.focus(), 200)
   }
   window.localizarProduto = window.abrirLocalizar
 
-  // ————————————————————————————————————————————————
-  // FILTRAR enquanto digita
-  // ————————————————————————————————————————————————
-  searchInput.addEventListener('input', ()=>{
+  searchInput.addEventListener('input', () => {
     const q = searchInput.value.trim().toLowerCase()
     if (!q) {
-      resultsBox.innerHTML = '<p class="text-center text-gray-500">Digite acima para buscar.</p>'
+      resultsBox.innerHTML = `<p class="text-center text-gray-500">Digite acima para buscar.</p>`
       return
     }
-    const found = allProducts.filter(p=>{
-      return (p.nome||'').toLowerCase().includes(q)
-          || (p.codigo_barras||'').includes(q)
-    })
+    const found = allProducts.filter(p =>
+      (p.nome || '').toLowerCase().includes(q) || (p.codigo_barras || '').includes(q)
+    )
     if (!found.length) {
-      resultsBox.innerHTML = '<p class="text-center text-gray-500">Nenhum produto encontrado.</p>'
+      resultsBox.innerHTML = `<p class="text-center text-gray-500">Nenhum produto encontrado.</p>`
       return
     }
-    // monta lista
     resultsBox.innerHTML = ''
-    found.forEach(p=>{
+    found.forEach(p => {
       const el = document.createElement('div')
       el.className = 'p-3 hover:bg-gray-100 rounded-lg cursor-pointer flex justify-between items-center'
       el.innerHTML = `
@@ -90,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         <div class="text-gray-600">R$ ${parseNum(p.preco).toFixed(2)}</div>
       `
-      el.addEventListener('click', ()=>{
+      el.addEventListener('click', () => {
         codigoInp.value = p.codigo_barras
         quantInp.focus()
         searchToggle.checked = false
@@ -99,51 +194,70 @@ document.addEventListener('DOMContentLoaded', () => {
     })
   })
 
-  // ————————————————————————————————————————————————
-  // VALIDAR e enviar adicionar produto
-  // ————————————————————————————————————————————————
-  form.addEventListener('submit', e=>{
-    e.preventDefault()
-    errCod.classList.add('hidden'); errQt.classList.add('hidden')
+  function updateResumo() {
+    const tot = parseNum(totalSpan.textContent)
+    const pct = parseFloat(descInput.value) || 0
+    document.getElementById('totalModal').textContent = (tot * (1 - pct/100)).toFixed(2)
+    recInput.min = (tot * (1 - pct/100)).toFixed(2)
+  }
 
-    fetch('/validar_produto',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        codigo_barras: codigoInp.value.trim(),
-        quantidade:    quantInp.value.trim()
-      })
+  function calculaTroco() {
+    const tot = parseNum(totalSpan.textContent)
+    const pct = parseFloat(descInput.value) || 0
+    const base = tot * (1 - pct/100)
+    const rec = parseFloat(recInput.value) || 0
+    const troco = rec - base
+    const metodo = document.querySelector('input[name="pagamento"]:checked').value
+    if (metodo === 'dinheiro' && rec >= base) {
+      trocoCont.classList.remove('hidden')
+      trocoInput.value = troco.toFixed(2)
+    } else {
+      trocoCont.classList.add('hidden')
+      trocoInput.value = '0.00'
+    }
+  }
+
+  function initModal() {
+    descInput.value = '0'
+    descInput.placeholder = 'Digite um desconto...'
+    recInput.value = ''
+    recInput.placeholder = 'Quanto o cliente pagou?'
+    trocoCont.classList.add('hidden')
+    updateResumo()
+  }
+
+  descInput.addEventListener('input', () => { updateResumo(); calculaTroco() })
+  recInput.addEventListener('input', calculaTroco)
+  payRads.forEach(r => r.addEventListener('change', calculaTroco))
+
+  window.abrirModalPagamento = () => {
+    payToggle.checked = true
+    initModal()
+  }
+
+  btnConfirm.addEventListener('click', () => {
+    const pagamento = document.querySelector('input[name="pagamento"]:checked').value
+    const desconto = parseFloat(descInput.value) || 0
+    const dados = { pagamento, desconto }
+
+    fetch('/finalizar_venda', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(dados)
     })
-    .then(async res=>{
-      if (res.ok) return form.submit()
-      const data = await res.json().catch(()=>({message:'Erro.'}))
-      if (res.status===404) {
-        errCod.textContent = data.message
-        errCod.classList.remove('hidden')
-        codigoInp.focus()
-      } else {
-        errQt.textContent = data.message
-        errQt.classList.remove('hidden')
-        quantInp.focus()
-      }
+    .then(r => {
+      if (!r.ok) return r.json().then(d => { throw d })
+      location.reload()
     })
-    .catch(_=>{
-      window.dispatchEvent(new CustomEvent('toast',{detail:'Erro na validação.'}))
+    .catch(err => {
+      showToast(err.error || 'Erro ao finalizar venda.')
     })
   })
 
-  // ————————————————————————————————————————————————
-  // TOAST de carregamento
-  // ————————————————————————————————————————————————
-  window.dispatchEvent(new CustomEvent('toast',{detail:'PDV carregado!'}))
-
-  // ————————————————————————————————————————————————
-  // ATALHOS teclado
-  // ————————————————————————————————————————————————
-  document.addEventListener('keydown', e=>{
-    if (['INPUT','TEXTAREA'].includes(e.target.tagName)) return
-    switch(e.key){
-      case 'F1': e.preventDefault(); openMenu(); break
+  document.addEventListener('keydown', e => {
+    if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return
+    switch (e.key) {
+      case 'F1': e.preventDefault(); window.location = '/?limpar=1'; break
       case 'F2': e.preventDefault(); abrirModalPagamento(); break
       case 'F3': e.preventDefault(); codigoInp.focus(); break
       case 'F5': e.preventDefault(); abrirLocalizar(); break
@@ -156,123 +270,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   })
 
-  // ————————————————————————————————————————————————
-  // MODAL Pagamento: resumo + troco
-  // ————————————————————————————————————————————————
-  function updateResumo(){
-    const tot = parseNum(totalSpan.textContent)
-    const pct = parseFloat(descInput.value)||0
-    document.getElementById('modal-total').textContent          = tot.toFixed(2)
-    document.getElementById('modal-desconto-total').textContent = `${pct.toFixed(0)}%`
-    recInput.min = (tot*(1-pct/100)).toFixed(2)
-  }
-  function calculaTroco(){
-    const tot = parseNum(totalSpan.textContent)
-    const pct = parseFloat(descInput.value)||0
-    const base = tot*(1-pct/100)
-    const rec  = parseFloat(recInput.value)||0
-    const troco = rec - base
-    const metodo = document.querySelector('input[name="pagamento"]:checked').value
-    if (metodo==='dinheiro' && rec>=base){
-      trocoCont.classList.remove('hidden')
-      trocoInput.value = troco.toFixed(2)
-    } else {
-      trocoCont.classList.add('hidden')
-      trocoInput.value = '0.00'
+  btnMenu.addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('hidden')
+  })
+
+  window.cancelarVenda = () => {
+    if (confirm('Deseja cancelar todo o pedido?')) {
+      fetch('/cancelar_venda', { method: 'POST' }).then(() => location.reload())
     }
   }
-  function initModal(){
-    descInput.value = '0'
-    recInput.value  = ''
-    trocoCont.classList.add('hidden')
-    updateResumo()
-  }
-  descInput.addEventListener('input', ()=>{
-    updateResumo(); calculaTroco()
-  })
-  recInput.addEventListener('input', calculaTroco)
-  payRads.forEach(r=> r.addEventListener('change', calculaTroco))
-
-  window.abrirModalPagamento = ()=>{
-    payToggle.checked = true
-    initModal()
-  }
-
-  // ————————————————————————————————————————————————
-  // habilita/desabilita Finalizar
-  // ————————————————————————————————————————————————
-  function updateFinal(){
-    btnFinal.disabled = !(cartArea.querySelectorAll('article').length>0)
-  }
-  new MutationObserver(updateFinal)
-    .observe(cartArea,{ childList:true, subtree:true })
-  updateFinal()
-
-  // ————————————————————————————————————————————————
-  // confirmar venda
-  // ————————————————————————————————————————————————
-  btnConfirm.addEventListener('click', ()=>{
-    const pagamento = document.querySelector('input[name="pagamento"]:checked').value
-    const desconto  = parseFloat(descInput.value)||0
-    const dados     = { pagamento, desconto }
-    fetch('/finalizar_venda',{
-      method:'POST',
-      headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify(dados)
-    })
-    .then(r=>{
-      if (!r.ok) throw new Error()
-      location.reload()
-    })
-    .catch(_=>{
-      const pend = JSON.parse(localStorage.getItem('pendentes')||'[]')
-      pend.push(dados)
-      localStorage.setItem('pendentes', JSON.stringify(pend))
-      window.dispatchEvent(new CustomEvent('toast',{detail:'Venda salva offline.'}))
-      setTimeout(()=>location.reload(),1000)
-    })
-  })
-  window.addEventListener('online', ()=>{
-    const pend = JSON.parse(localStorage.getItem('pendentes')||'[]')
-    pend.forEach(dados=>{
-      fetch('/finalizar_venda',{
-        method:'POST',
-        headers:{ 'Content-Type':'application/json' },
-        body: JSON.stringify(dados)
-      })
-    })
-    localStorage.removeItem('pendentes')
-  })
-
-  // ————————————————————————————————————————————————
-  // auxiliares finais
-  // ————————————————————————————————————————————————
-  window.cancelarVenda = ()=>{
-    if (confirm('Deseja cancelar todo o pedido?')){
-      fetch('/cancelar_venda',{ method:'POST' })
-        .then(()=>location.reload())
-    }
-  }
-  window.cancelarProduto = ()=>{
+  window.cancelarProduto = () => {
     form.reset()
     quantInp.value = '1.000'
     codigoInp.focus()
   }
-  window.openMenu = ()=>{
-    const sb = document.getElementById('sidebar')
-    if (sb) sb.classList.toggle('hidden')
-  }
-  window.removerItem = idx=>{
-    if (confirm('Remover este item?')){
-      fetch('/remove_item',{
-        method:'POST',
-        headers:{ 'Content-Type':'application/json' },
-        body: JSON.stringify({ index: idx })
-      }).then(()=>location.reload())
-    }
-  }
-  window.editarItem = idx=>{
-    console.log('Editar', idx)
-  }
 
+  updateFinal()
 })

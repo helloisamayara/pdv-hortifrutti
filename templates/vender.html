@@ -6,14 +6,13 @@
      @toast.window="toast = $event.detail; showToast = true; setTimeout(()=>showToast=false,2000)"
      class="container mx-auto max-w-screen-2xl h-full flex gap-6">
 
-  <!-- Adicionar Produtos -->
+  <!-- ADICIONAR PRODUTOS via AJAX -->
   <div class="flex-1 bg-gray-50 p-6 overflow-auto rounded-lg shadow-lg">
     <div class="mb-6">
       <h2 class="text-2xl font-semibold flex items-center space-x-2 mb-4">
         <i class="fas fa-plus-circle text-purple-600"></i><span>Adicionar Produtos</span>
       </h2>
-      <form id="addForm" action="{{ url_for('adicionar_produto') }}" method="post"
-            class="grid grid-cols-1 md:grid-cols-[1fr_120px_1fr] gap-4 items-end">
+      <form id="addForm" class="grid grid-cols-1 md:grid-cols-[1fr_120px_1fr] gap-4 items-end">
         <div>
           <label class="sr-only" for="codigoInput">Código</label>
           <input id="codigoInput" name="codigo_barras" placeholder="Código de Barras"
@@ -26,7 +25,8 @@
                  class="input input-bordered w-full text-center focus:ring-2 focus:ring-purple-500"/>
           <p id="error-quantidade" class="text-red-500 text-sm mt-1 hidden"></p>
         </div>
-        <button type="submit" class="btn bg-purple-600 hover:bg-purple-700 text-white py-2">
+        <button id="btnAddProduto" type="submit"
+                class="btn bg-purple-600 hover:bg-purple-700 text-white py-2">
           <i class="fas fa-cart-plus mr-2"></i>Adicionar
         </button>
       </form>
@@ -35,7 +35,7 @@
     {% include 'modais.html' %}
   </div>
 
-  <!-- Carrinho -->
+  <!-- CARRINHO -->
   <div class="w-1/3 bg-white p-6 flex flex-col overflow-hidden rounded-lg shadow-lg">
     {% include 'carrinho.html' %}
   </div>
@@ -45,7 +45,7 @@
 {% block page_footer %}
   <footer class="bg-white border-t py-2">
     <div class="container mx-auto flex justify-between px-4 space-x-2">
-      <button onclick="cancelarVenda(); location.href='{{ url_for('index') }}';"
+      <button onclick="window.location='{{ url_for('index', limpar=1) }}'"
               class="btn btn-sm bg-gray-500 text-white hover:bg-gray-600">
         <i class="fas fa-home mr-1"></i>INÍCIO (F1)
       </button>
@@ -71,6 +71,10 @@
 {% endblock %}
 
 {% block scripts %}
+  <script>
+    window.INIT_CART  = {{ carrinho|tojson }};
+    window.INIT_TOTAL = {{ total }};
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
   <script src="{{ url_for('static', filename='js/pdv.js') }}"></script>
 {% endblock %}
